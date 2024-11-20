@@ -1,3 +1,5 @@
+> **_Disclaimer_** :  
+> Those scripts are ubuntu and fedora in 24.04 and 41 respective
 ___
 
 ## Prepare Workstation

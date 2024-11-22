@@ -65,11 +65,33 @@
             dest: /usr/local/bin
             remote_src: yes
 
-    - name: Install Visual Studio Code and extensions
-      become: true
-      dnf:
-        name: code
-        state: present
+    - block:
+      - name: Install Microsoft Key
+        become: true
+        rpm_key:
+          url: 'https://packages.microsoft.com/keys/microsoft.asc'
+          state: present
+      - name: Install VSCode Repository
+        become: true
+        rpm_repository:
+          repo: 'deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main'
+          state: present
+          filename: vscode
+      - name: Install Visual Studio Code
+        become: true
+        dnf:
+          name: code
+      - name: Install Virtual Studio Code Extensions
+        shell:
+          cmd: code --install-extension '{{ item }}' 
+        loop: 
+          - ms-python.python
+          - ms-azuretools.vscode-docker
+          - bbenoist.vagrant
+          - hashicorp.terraform
+          - gruntfuggly.todo-tree
+          - njpwerner.autodocstring
+          - eamodio.gitlens
 
     - name: Install Brave Browser
       become: true

@@ -60,12 +60,27 @@
           gpgcheck=1
           gpgkey=https://www.virtualbox.org/download/oracle_vbox.asc
 
+
     # Passo 4: Instalar o VirtualBox
-    - name: Install VirtualBox
+    - name: Install VirtualBox (ignore GPG check)
       become: true
       dnf:
         name: VirtualBox
         state: present
+        disable_gpg_check: yes
+    - name: Download VirtualBox RPM Package
+      become: true
+      get_url:
+        url: https://download.virtualbox.org/virtualbox/7.0.22/VirtualBox-7.0-7.0.22_165102_fedora40-1.x86_64.rpm
+        dest: /tmp/VirtualBox.rpm
+
+    - name: Install VirtualBox RPM Package
+      become: true
+      dnf:
+        name: /tmp/VirtualBox.rpm
+        state: present
+
+
 
     - block:
       - name: Installing Vagrant 2.2.18

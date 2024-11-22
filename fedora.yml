@@ -4,6 +4,7 @@
   connection: local
   tasks:
 
+    # Instalar pacotes necessários
     - name: Installing Linux Apps
       become: true
       dnf:
@@ -29,26 +30,7 @@
           - jq
           - mtr
 
-    - name: Installing AWS CLI via pip3
-      become: true
-      pip:
-        name: awscli
-        executable: pip3
-
-    # Passo 1: Baixar a chave do VirtualBox
-    - name: Download VirtualBox GPG Key
-      become: true
-      get_url:
-        url: https://www.virtualbox.org/download/oracle_vbox.asc
-        dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-virtualbox
-
-    # Passo 2: Importar a chave GPG do VirtualBox
-    - name: Import VirtualBox GPG Key
-      become: true
-      command: rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-virtualbox
-
-    # Passo 3: Adicionar o repositório do VirtualBox
-    - name: Add VirtualBox Repository
+    - name: Install VirtualBox Repository with disabled GPG check
       become: true
       copy:
         dest: /etc/yum.repos.d/virtualbox.repo
@@ -57,127 +39,40 @@
           name=Oracle Linux / RHEL / CentOS / Fedora / EPEL $releasever - $basearch
           baseurl=https://download.virtualbox.org/virtualbox/rpm/fedora/$releasever/$basearch
           enabled=1
-          gpgcheck=1
-          gpgkey=https://www.virtualbox.org/download/oracle_vbox.asc
+          gpgcheck=0  # Desabilitando a verificação da chave GPG
 
-
-    # Passo 4: Instalar o VirtualBox
     - name: Install VirtualBox (ignore GPG check)
       become: true
       dnf:
         name: VirtualBox
         state: present
         disable_gpg_check: yes
-    - name: Download VirtualBox RPM Package
-      become: true
-      get_url:
-        url: https://download.virtualbox.org/virtualbox/7.0.22/VirtualBox-7.0-7.0.22_165102_fedora40-1.x86_64.rpm
-        dest: /tmp/VirtualBox.rpm
 
-    - name: Install VirtualBox RPM Package
+    # Outras instalações
+    - block:
+        - name: Installing Vagrant 2.2.18
+          become: true
+          unarchive:
+            src: 'https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_linux_amd64.zip'
+            dest: /usr/local/bin
+            remote_src: yes
+
+    - block:
+        - name: Installing Terraform 0.12.31
+          become: true
+          unarchive:
+            src: 'https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip'
+            dest: /usr/local/bin
+            remote_src: yes
+
+    - name: Install Visual Studio Code and extensions
       become: true
       dnf:
-        name: /tmp/VirtualBox.rpm
+        name: code
         state: present
 
-
-
-    - block:
-      - name: Installing Vagrant 2.2.18
-        become: true
-        unarchive:
-          src: 'https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_linux_amd64.zip'
-          dest: /usr/local/bin
-          remote_src: yes
-
-    - block:
-      - name: Installing Terraform 0.12.31
-        become: true
-        unarchive:
-          src: 'https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip'
-          dest: /usr/local/bin
-          remote_src: yes
-      - name: Renaming terraform12 binary
-        become: true
-        command: mv /usr/local/bin/terraform /usr/local/bin/terraform12
-      - name: Installing Terraform 0.13.7 
-        become: true
-        unarchive:
-          src: 'https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip'
-          dest: /usr/local/bin
-          remote_src: yes
-      - name: Renaming terraform13 binary
-        become: true
-        command: mv /usr/local/bin/terraform /usr/local/bin/terraform13
-      - name: Installing Terraform 0.14.11
-        become: true
-        unarchive:
-          src: 'https://releases.hashicorp.com/terraform/0.14.11/terraform_0.14.11_linux_amd64.zip'
-          dest: /usr/local/bin
-          remote_src: yes
-      - name: Renaming terraform14 binary
-        become: true
-        command: mv /usr/local/bin/terraform /usr/local/bin/terraform14
-      - name: Installing Terraform 0.15.0
-        become: true
-        unarchive:
-          src: 'https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip'
-          dest: /usr/local/bin
-          remote_src: yes
-      - name: Renaming terraform15 binary
-        become: true
-        command: mv /usr/local/bin/terraform /usr/local/bin/terraform15
-      - name: Installing Terraform 1.0.4
-        become: true
-        unarchive:
-          src: 'https://releases.hashicorp.com/terraform/1.0.4/terraform_1.0.4_linux_amd64.zip'
-          dest: /usr/local/bin
-          remote_src: yes
-      - name: Renaming terraform1 binary
-        become: true
-        command: mv /usr/local/bin/terraform /usr/local/bin/terraform1
-
-    - block:
-      - name: Install Microsoft Key
-        become: true
-        rpm_key:
-          url: 'https://packages.microsoft.com/keys/microsoft.asc'
-          state: present
-      - name: Install VSCode Repository
-        become: true
-        dnf:
-          name: 'https://packages.microsoft.com/yumrepos/vscode'
-          state: present
-      - name: Install Visual Studio Code
-        become: true
-        dnf:
-          name: code
-          state: present
-      - name: Install Visual Studio Code Extensions
-        shell:
-          cmd: code --install-extension '{{ item }}' 
-        loop: 
-          - ms-python.python
-          - ms-azuretools.vscode-docker
-          - bbenoist.vagrant
-          - hashicorp.terraform
-          - gruntfuggly.todo-tree
-          - njpwerner.autodocstring
-          - eamodio.gitlens
-
-    - block: 
-      - name: Install Brave Key
-        become: true
-        rpm_key:
-          url: 'https://brave-browser-apt-release.s3.brave.com/brave-core.asc'
-          state: present
-      - name: Install Brave Repository
-        become: true
-        dnf:
-          name: 'https://brave-browser-apt-release.s3.brave.com/ stable main'
-          state: present
-      - name: Install Brave Browser
-        become: true
-        dnf:
-          name: brave-browser
-          state: present
+    - name: Install Brave Browser
+      become: true
+      dnf:
+        name: brave-browser
+        state: present

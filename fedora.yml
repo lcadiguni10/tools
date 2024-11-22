@@ -142,6 +142,24 @@
         - njpwerner.autodocstring
 
     # Instalar Brave Browser
+    - name: Install Brave Browser GPG key
+      become: true
+      rpm_key:
+        url: 'https://brave-browser-apt-release.s3.brave.com/brave-core.asc'
+        state: present
+
+    - name: Add Brave Repository
+      become: true
+      copy:
+        dest: /etc/yum.repos.d/brave-browser.repo
+        content: |
+          [brave]
+          name=Brave Browser
+          baseurl=https://brave-browser-rpm-release.s3.brave.com/x86_64
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://brave-browser-apt-release.s3.brave.com/brave-core.asc
+
     - name: Install Brave Browser
       become: true
       dnf:

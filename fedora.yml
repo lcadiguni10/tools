@@ -29,25 +29,6 @@
           - jq
           - mtr
 
-    # Adicionar repositório do VirtualBox
-    - name: Install VirtualBox Repository with disabled GPG check
-      become: true
-      copy:
-        dest: /etc/yum.repos.d/virtualbox.repo
-        content: |
-          [virtualbox]
-          name=Oracle Linux / RHEL / CentOS / Fedora / EPEL $releasever - $basearch
-          baseurl=https://download.virtualbox.org/virtualbox/rpm/fedora/$releasever/$basearch
-          enabled=1
-          gpgcheck=0  # Desabilitando a verificação da chave GPG
-
-    - name: Install VirtualBox (ignore GPG check)
-      become: true
-      dnf:
-        name: VirtualBox
-        state: present
-        disable_gpg_check: yes
-
     # Instalar outros pacotes
     - block:
         - name: Installing Vagrant 2.2.18

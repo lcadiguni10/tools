@@ -22,13 +22,9 @@
           - make
           - git
           - bash-completion
-          - gnupg-agent
           - zsh
           - flameshot
-          - fonts-hack
           - tilix
-          - virtualbox
-          - mlocate
           - krita
           - jq
           - mtr
@@ -38,6 +34,24 @@
       pip:
         name: awscli
         executable: pip3
+
+    - name: Install VirtualBox GPG Key
+      become: true
+      rpm_key:
+        url: https://www.virtualbox.org/download/oracle_vbox.asc
+        state: present
+
+    - name: Add VirtualBox Repository
+      become: true
+      dnf:
+        name: https://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo
+        state: present
+
+    - name: Install VirtualBox
+      become: true
+      dnf:
+        name: VirtualBox
+        state: present
 
     - block:
       - name: Installing Vagrant 2.2.18

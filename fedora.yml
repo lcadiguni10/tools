@@ -35,18 +35,32 @@
         name: awscli
         executable: pip3
 
-    - name: Install VirtualBox GPG Key
+    # Passo 1: Baixar a chave do VirtualBox
+    - name: Download VirtualBox GPG Key
       become: true
-      rpm_key:
+      get_url:
         url: https://www.virtualbox.org/download/oracle_vbox.asc
-        state: present
+        dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-virtualbox
 
+    # Passo 2: Importar a chave GPG do VirtualBox
+    - name: Import VirtualBox GPG Key
+      become: true
+      command: rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-virtualbox
+
+    # Passo 3: Adicionar o repositório do VirtualBox
     - name: Add VirtualBox Repository
       become: true
-      dnf:
-        name: https://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo
-        state: present
+      copy:
+        dest: /etc/yum.repos.d/virtualbox.repo
+        content: |
+          [virtualbox]
+          name=Oracle Linux / RHEL / CentOS / Fedora / EPEL $releasever - $basearch
+          baseurl=https://download.virtualbox.org/virtualbox/rpm/fedora/$releasever/$basearch
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://www.virtualbox.org/download/oracle_vbox.asc
 
+    # Passo 4: Instalar o VirtualBox
     - name: Install VirtualBox
       become: true
       dnf:

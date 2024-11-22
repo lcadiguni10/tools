@@ -119,7 +119,7 @@
       - name: Install Visual Studio Code
         become: true
         dnf:
-      - name: code
+          name: code
       - name: Install Virtual Studio Code Extensions
         shell:
           cmd: code --install-extension '{{ item }}' 
@@ -130,7 +130,6 @@
           - hashicorp.terraform
           - gruntfuggly.todo-tree
           - njpwerner.autodocstring
-          - eamodio.gitlens
 
     - name: Install Brave Browser
       become: true

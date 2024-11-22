@@ -141,17 +141,29 @@
         - gruntfuggly.todo-tree
         - njpwerner.autodocstring
 
-    # Adicionar o repositório do Brave
+    - name: Install dnf-plugins-core
+      become: true
+      dnf:
+        name: dnf-plugins-core
+        state: present
+
+    # Criar arquivo de repositório do Brave
     - name: Add Brave Browser repository
       become: true
-      command: >
-        dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+      copy:
+        dest: /etc/yum.repos.d/brave-browser.repo
+        content: |
+          [brave]
+          name=Brave Browser
+          baseurl=https://brave-browser-rpm-release.s3.brave.com/x86_64/
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
 
     # Importar a chave GPG do Brave
     - name: Import Brave Browser GPG key
       become: true
-      command: >
-        rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+      command: rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
 
     # Instalar o Brave Browser
     - name: Install Brave Browser

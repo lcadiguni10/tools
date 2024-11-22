@@ -1,0 +1,9 @@
+- name: Update all packages
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Upgrade all installed packages
+      become: true
+      dnf:
+        name: "*"
+        state: latest

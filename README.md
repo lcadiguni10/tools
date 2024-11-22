@@ -1,5 +1,6 @@
 > **_Disclaimer_** :  
-> Those scripts are ubuntu and fedora in 24.04 and 41 respective
+> Those scripts are Ubuntu and Fedora in 24.04 and 41 respective
+> The Fedora playbook is functional!
 ___
 
 ## Prepare Workstation
